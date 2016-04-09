@@ -25,43 +25,6 @@ DiscSimulator.Vector = function(x, y, startx = 0, starty = 0) {
   this.normalVector = function() {
     return new Vector(this.y, -this.x);
   };
-
-  this.draw = function() {
-    if (!this.graphics) return;
-
-    this.graphics.x = this.startx;
-    this.graphics.y = this.starty;
-
-    var arrow = this.graphics.getChildAt(0);
-
-    arrow.graphics.clear();
-    arrow.graphics
-      .beginStroke("black")
-      .moveTo(0, 0)
-      .lineTo(this.x, this.y);
-
-    var arrowhead = this.graphics.getChildAt(1);
-    var matrix = new createjs.Matrix2D()
-      .translate(this.x, this.y)
-      .rotate(Math.atan2(this.y, this.x) * (180/Math.PI));
-
-    arrowhead.transformMatrix = matrix;
-  };
-
-  this.enableDrawing = function(stage) {
-    var arrow = new createjs.Shape();
-    var arrowhead = new createjs.Shape();
-    arrowhead.graphics
-      .beginFill("black")
-      .drawPolyStar(-8, 0, 8, 3, 0, 0);
-
-    var graphics = new createjs.Container();
-
-    graphics.addChildAt(arrow, 0);
-    graphics.addChildAt(arrowhead, 1);
-    stage.addChild(graphics);
-    this.graphics = graphics;
-  };
 };
 
 DiscSimulator.Vector.dot = function(vec1, vec2) {
@@ -120,8 +83,8 @@ DiscSimulator.intersection = function(circle1, circle2) {
 
   // Determine the distance from point 0 to point 2.
   a = ((circle1.radius * circle1.radius) -
-      (circle2.radius * circle2.radius) +
-      (d * d)) / (2.0 * d);
+    (circle2.radius * circle2.radius) +
+    (d * d)) / (2.0 * d);
 
   // Determine the coordinates of point 2.
   x2 = circle1.x + (dx * a / d);
@@ -178,31 +141,24 @@ DiscSimulator.rotate = function(angleX, angleY) {
 };
 
 DiscSimulator.init = function() {
-
   this.stage = new createjs.Stage("canvas");
   this.stage.scaleY = -1;
   this.stage.regX = -this.stage.canvas.width / 2;
   this.stage.regY = this.stage.canvas.height / 2 - 80;
 
   this.disc = this.createDisc(0, 0, 300);
-
-  this.armCircle = new DiscSimulator.Circle(0, -465, 465);
-  this.armVector = new DiscSimulator.Vector(0, 0, 0, -465);
   this.arm = this.createArm(0, -465, 20, 490);
 
   this.stage.addChild(this.disc, this.arm);
-
   this.stage.update();
-};
 
-DiscSimulator.init();
+  this.armCircle = new DiscSimulator.Circle(0, -465, 465);
+  this.armVector = new DiscSimulator.Vector(0, 0, 0, -465);
+};
 
 DiscSimulator.xMove = document.getElementById("xValue");
 DiscSimulator.yMove = document.getElementById("yValue");
 DiscSimulator.moveToButton = document.getElementById("moveToButton");
-// DiscSimulator.xRot = document.getElementById("xRotation");
-// DiscSimulator.yRot = document.getElementById("yRotation");
-// DiscSimulator.rotateButton = document.getElementById("rotateButton");
 
 DiscSimulator.moveToButton.addEventListener("click", function() {
   var point = new createjs.Shape();
@@ -217,12 +173,21 @@ DiscSimulator.moveToButton.addEventListener("click", function() {
   var pts = DiscSimulator.calulateArmArcIntersections(point.x, point.y);
 
   var intersectionPoint;
-  var sign = -1;
+  var sign;
 
   if (point.x > 0) {
-    intersectionPoint = { x: pts[0], y: pts[1] };
+    intersectionPoint = {
+      x: pts[0],
+      y: pts[1]
+    };
+
+    sign = -1;
   } else {
-    intersectionPoint = { x: pts[2], y: pts[3] };
+    intersectionPoint = {
+      x: pts[2],
+      y: pts[3]
+    };
+
     sign = 1;
   }
 
@@ -239,7 +204,5 @@ DiscSimulator.moveToButton.addEventListener("click", function() {
 
   DiscSimulator.rotate(alpha, beta);
 });
-//
-// DiscSimulator.rotateButton.addEventListener("click", function() {
-//   DiscSimulator.rotate(DiscSimulator.xRot.value, DiscSimulator.yRot.value);
-// });
+
+DiscSimulator.init();
