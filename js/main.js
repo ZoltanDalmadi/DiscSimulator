@@ -113,6 +113,28 @@ DiscSimulator.calulateArmArcIntersections = function(x, y) {
   return this.intersection(c, this.armCircle);
 };
 
+DiscSimulator.lengthOf = function(x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+DiscSimulator.getClosestIntersectionPoint = function(pts) {
+  var d1 = DiscSimulator.lengthOf(pts[0], pts[1],
+      DiscSimulator.armPos.x, DiscSimulator.armPos.y);
+  var d2 = DiscSimulator.lengthOf(pts[2], pts[3],
+        DiscSimulator.armPos.x, DiscSimulator.armPos.y);
+
+  var min = Math.min(d1, d2);
+
+  if (min == d1) {
+    return {x: pts[0], y: pts[1]};
+  } else {
+    return {x: pts[2], y: pts[3]};
+  }
+};
+
 DiscSimulator.drawIntersections = function(pts) {
   var p1 = new createjs.Shape();
   var p2 = new createjs.Shape();
@@ -154,6 +176,7 @@ DiscSimulator.init = function() {
 
   this.armCircle = new DiscSimulator.Circle(0, -465, 465);
   this.armVector = new DiscSimulator.Vector(0, 0, 0, -465);
+  this.armPos = new DiscSimulator.Vector(0, 0);
 };
 
 DiscSimulator.xMove = document.getElementById("xValue");
@@ -172,26 +195,14 @@ DiscSimulator.moveToButton.addEventListener("click", function() {
 
   var pts = DiscSimulator.calulateArmArcIntersections(point.x, point.y);
 
-  var intersectionPoint, sign;
+  var intersectionPoint = DiscSimulator.getClosestIntersectionPoint(pts);
 
-  if (point.x > 0) {
-    intersectionPoint = {
-      x: pts[0],
-      y: pts[1]
-    };
-
-    sign = -1;
-  } else {
-    intersectionPoint = {
-      x: pts[2],
-      y: pts[3]
-    };
-
-    sign = 1;
-  }
+  // further tweaking needed
+  var sign = -1;
 
   var u = new DiscSimulator.Vector(point.x, point.y);
   var v = new DiscSimulator.Vector(intersectionPoint.x, intersectionPoint.y);
+  DiscSimulator.armPos = v;
 
   var dot = DiscSimulator.Vector.dot(u, v);
   var alpha = Math.acos(dot / (u.length() * v.length())) * 180 / Math.PI * sign;
